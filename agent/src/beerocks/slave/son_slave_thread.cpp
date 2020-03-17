@@ -4434,8 +4434,7 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
 
 /**
  * @brief Get the channel preference 
- *
- * @pre The channel operating class and the preference operating class have to match.
+ * 
  * @param channel channel to check
  * @param preference preference 
  * @return NON_OPERABLE if channel is restricted, channel preference otherwise
@@ -4447,10 +4446,10 @@ static uint8_t get_channel_preference(const beerocks::message::sWifiChannel chan
     auto bw                = static_cast<beerocks::eWiFiBandwidth>(channel.channel_bandwidth);
     auto operating_class   = wireless_utils::get_operating_class_by_channel(channel);
 
-    LOG_IF(operating_class != preference.oper_class, FATAL)
-        << "Invalid channel operating class " << int(operating_class)
-        << ", preference operating class is " << int(preference.oper_class);
-
+    // consider channels in different operating classes as restricted
+    if (operating_class != preference.oper_class) {
+        return preference.preference;
+    }
     // operating classes 128,129,130 use center channel **unlike the other classes**,
     // so convert channel and bandwidth to center channel.
     // For more info, refer to Table E-4 in the 802.11 specification.
@@ -4485,29 +4484,20 @@ beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
             continue;
         }
         for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
-            const auto &channel  = hostap_params.supported_channels[i];
-            auto operating_class = wireless_utils::get_operating_class_by_channel(channel);
-
+            const auto &channel = hostap_params.supported_channels[i];
             // Skip DFS channels
             if (channel.is_dfs_channel) {
-                LOG(DEBUG) << "Skip DFS channel " << int(channel.channel) << " operating class "
-                           << int(operating_class);
-                continue;
-            }
-            // skip channels from other operating classes
-            if (operating_class != preference.oper_class) {
+                LOG(DEBUG) << "Skip DFS channel " << int(channel.channel);
                 continue;
             }
             // Skip restricted channels
             if (get_channel_preference(channel, preference) ==
                 wfa_map::cPreferenceOperatingClasses::ePreference::NON_OPERABLE) {
-                LOG(DEBUG) << "Skip restricted channel " << int(channel.channel)
-                           << " operating class " << int(operating_class);
+                LOG(DEBUG) << "Skip restricted channel " << int(channel.channel);
                 continue;
             }
             // If we got this far, we found a candidate channel, so switch to it
-            LOG(DEBUG) << "Selected channel " << int(channel.channel) << " operating class "
-                       << int(operating_class);
+            LOG(DEBUG) << "Selected channel " << int(channel.channel);
             return channel;
         }
     }
@@ -4531,10 +4521,6 @@ bool slave_thread::channel_selection_current_channel_restricted()
         if (preference.preference !=
             wfa_map::cPreferenceOperatingClasses::ePreference::NON_OPERABLE) {
             LOG(WARNING) << "Ignoring operable channels preference";
-            continue;
-        }
-        // skip channels from other operating classes
-        if (operating_class != preference.oper_class) {
             continue;
         }
         if (get_channel_preference(channel, preference) ==
