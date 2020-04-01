@@ -140,6 +140,14 @@ Example:
         return false;
     }
 ```
+Prefer to use std algorithms as much as possible.
+Get to know std algorithms.
+std algorithms are better than hand crafted loops.
+std algorithms are thoughful, and tested, and do as expected.
+And std algoritms are also well documented.
+```cpp
+std::transform( in.begin(), in.end(), out.begin() [/*...*/](/*...*/){/*...*/} );
+```
 
 Prefer to use ranged loops if at all possible:
 
