@@ -204,6 +204,70 @@ In the following example, the empty string is the sentinel value indicating fail
 std::string parse_bss_info(const std::string &bss_info_str, db::bss_info_conf_t &bss_info_conf);
 ```
 
+## Comments
+Comments are important part of the code base.
+Comments are not compiled, nor have any influence on run time or any machinary.
+Comments are for humans, for developers, for us.
+Comments have the sole purpose of keeping the code maintainable.
+A good comment is a one that you, the writer of the comment, can understand after a while, after getting out of the context of writing it.
+Comments are written for future readers, it may be the future you, it may be someone else - 
+in this context in mind write your comments.
+Comments normaly explains the *why* and not the *what*.
+
+### Simple Comments
+It is useless to state the obvious:
+```cpp
+// checkig that the poinnter is not null
+if (ptr){
+}
+```
+
+However, it is extremely helpful to state our expectations
+```cpp
+// it is legal to receive an empty pointer.
+// in case of exiting pointer pointer we need to ...
+// and in case it is null we need to ...
+if (ptr){
+} else {
+}
+```
+
+### Spanning Comments
+There are cases that writing a comment accross few segments of the code, usually within a function's body, makes code understanding much easier.
+Sometimes it is hard to see behind the machincs of the code its intent.
+Adding descriptive comments that "tells the story" makes it much easier to follow the code structure and logic even before reading the code itself. Example:
+```cpp
+// in this section we have to gather information from few resources:
+// A, B and C.
+// The best would be to have all of them, but it is also legal and
+// possible to progress with A and C only.
+// therefore we try to get A, then we try to get C,
+// and upon success we try to get B as well.
+// the action is taken at the end.
+
+// get A //
+/* 10 lines of complex machinary, iterating on a complex data structure */
+
+// get C //
+/* 22 lines of code with 5 exit points in various conditions */
+
+// get B //
+auto b = getB();
+
+// take the action //
+if (a && b && c) {
+    actionABC(a, b, c);
+} else if (a && b) {
+    actionAC(a, c);
+} else {
+// error
+}
+```
+### Poor Comments
+One indication for poor commenting process is that developers don't read comments.
+It means that they get used to comments that are irrelevant, hard to read or just outdated.
+This situation is in many cases worse then non commented code at all, because developers, seeking for assistance are reading misleading comments.
+
 ## Python code
 
 Follow PEP8.
