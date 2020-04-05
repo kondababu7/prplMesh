@@ -3550,6 +3550,44 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     }
     case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE: {
         LOG(TRACE) << "ACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE for mac " << hostap_mac;
+        auto response = beerocks_header->addClass<beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE>();
+        if (!response) {
+            LOG(ERROR) << "addClass cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE failed";
+            return false;
+        }
+
+        //get the mac from hostap_mac
+        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+
+        if (static_cast<eChannelScanOpErrCode>(response->op_error_code()) == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            LOG(DEBUG) << "received scan-trigger-response event for radio(" << radio_mac
+                       << "): success. no notification to task is required";
+            break;
+        }
+
+        dynamic_channel_selection_task::sScanEvent new_event;
+        new_event.radio_mac = radio_mac;
+        auto taskId         = database.get_dynamic_channel_selection_task_id(radio_mac);
+        if (taskId == -1) {
+            LOG(ERROR) << "no task for the requested mac (" << radio_mac << ") could be found!";
+            break;
+        }
+        
+        auto event_to_task  = dynamic_channel_selection_task::eEvent::INVALID_EVENT;
+        auto op_err_code = static_cast<eChannelScanOpErrCode>(response->op_error_code());
+        switch (op_err_code) {
+            case eChannelScanOpErrCode::CHANNEL_SCAN_OP_SCAN_IN_PROGRESS:
+                event_to_task = dynamic_channel_selection_task::eEvent::SCAN_ALREADY_IN_PROGRESS;
+                break;
+            case eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR:
+                event_to_task = dynamic_channel_selection_task::eEvent::SCAN_TRIGGER_FAILED;
+                break;
+            default:
+                LOG(ERROR) << "received unknown scan-trigger-response: " << int(op_err_code);
+                return false;
+        }
+        
+        tasks.push_event(taskId, int(event_to_task), static_cast<void *>(&new_event));
         break;
     }
     case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE: {
@@ -3573,7 +3611,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         new_event.radio_mac = radio_mac;
         auto taskID         = database.get_dynamic_channel_selection_task_id(radio_mac);
         if (taskID == -1) {
-            LOG(ERROR) << "no task for the requesed mac (" << radio_mac << ") could be found!";
+            LOG(ERROR) << "no task for the requested mac (" << radio_mac << ") could be found!";
         } else {
             tasks.push_event(taskID, (int)dynamic_channel_selection_task::eEvent::SCAN_TRIGGERED,
                              (void *)&new_event);
