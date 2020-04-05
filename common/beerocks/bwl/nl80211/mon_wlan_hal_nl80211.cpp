@@ -398,6 +398,24 @@ bool mon_wlan_hal_nl80211::channel_scan_dump_results()
     return false;
 }
 
+bool mon_wlan_hal_nl80211::scan_lock(const std::string& monitor_iface)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED";
+    return true;
+}
+
+bool mon_wlan_hal_nl80211::scan_unlock(const std::string& monitor_iface)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED";
+    return true;
+}
+
+bool mon_wlan_hal_nl80211::is_scan_lock_owner(const std::string& monitor_iface)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED";
+    return false;
+}
+
 bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 {
     // Filter out empty events

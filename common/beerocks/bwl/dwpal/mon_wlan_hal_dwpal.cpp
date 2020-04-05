@@ -878,6 +878,27 @@ bool mon_wlan_hal_dwpal::channel_scan_dump_results()
     return true;
 }
 
+bool mon_wlan_hal_dwpal::scan_lock(const std::string& monitor_iface)
+{
+    //TODO: Implement file-create-lock
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED";
+    return true;
+}
+
+bool mon_wlan_hal_dwpal::scan_unlock(const std::string& monitor_iface)
+{
+    //TODO: Implement file-create-unlock-by-file-removal
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED";
+    return true;
+}
+
+bool mon_wlan_hal_dwpal::is_scan_lock_owner(const std::string& monitor_iface)
+{
+    //TODO: Implement file-read-and-check-interface-locker-against-monitor-interface
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED";
+    return false;
+}
+
 bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std::string &opcode)
 {
     LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";

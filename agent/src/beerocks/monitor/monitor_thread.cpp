@@ -61,6 +61,8 @@ void monitor_thread::stop_monitor_thread()
         received_error_notification_ack_retry = 5;
     }
 
+    //TODO: for intel platforms only: unlock if locked by current monitor_iface
+
     if (received_error_notification_ack_retry > 0) {
 
         auto radio_node   = mon_db.get_radio_node();
@@ -1223,6 +1225,15 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             return false;
         }
 
+        //TODO: for intel platforms only: lock, trigger, scan/error, unlock
+        // if (!mon_wlan_hal->scan_lock(monitor_iface)) {
+        //     LOG(ERROR)
+        //         << "Failed to trigger a scan, scan is already in progress";
+        //     response_out->success() = enum::FAILURE_SCAN_IS_IN_PROGRESS;
+        //     message_com::send_cmdu(slave_socket, cmdu_tx);
+        //     break;
+        // }
+
         bool result = mon_wlan_hal->channel_scan_trigger(int(dwell_time_ms), channel_pool_vector);
         LOG_IF(!result, ERROR) << "channel_scan_trigger Failed";
 
@@ -1614,6 +1625,11 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
         message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
     case Event::Channel_Scan_Finished: {
+        //TODO: for intel platforms only: unlock
+        // if (!mon_wlan_hal->scan_unlock(monitor_iface)) {
+        //     LOG(FATAL)
+        //         << "Failed to unlock channel scans";
+        // }
         auto notification = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION>(cmdu_tx);
         if (!notification) {
@@ -1624,6 +1640,11 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
         message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
     case Event::Channel_Scan_Abort: {
+        //TODO: for intel platforms only: unlock
+        // if (!mon_wlan_hal->scan_unlock(monitor_iface)) {
+        //     LOG(FATAL)
+        //         << "Failed to unlock channel scans";
+        // }
         auto notification = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION>(cmdu_tx);
         if (!notification) {

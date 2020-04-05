@@ -58,6 +58,9 @@ public:
     virtual bool channel_scan_trigger(int dwell_time_msec,
                                       const std::vector<unsigned int> &channel_pool)     = 0;
     virtual bool channel_scan_dump_results()                                             = 0;
+    virtual bool scan_lock(const std::string& monitor_iface)                             = 0;
+    virtual bool scan_unlock(const std::string& monitor_iface)                           = 0;
+    virtual bool is_scan_lock_owner(const std::string& monitor_iface)                    = 0;
 };
 
 // mon HAL factory types
