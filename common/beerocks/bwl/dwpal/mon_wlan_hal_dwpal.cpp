@@ -789,6 +789,9 @@ bool mon_wlan_hal_dwpal::channel_scan_trigger(int dwell_time_msec,
 {
     LOG(DEBUG) << "Channel scan trigger received on interface=" << m_radio_info.iface_name;
 
+    LOG(ERROR) << "####### adam: return error #######";
+    return false;
+
     //build scan parameters
     ScanParams channel_scan_params = {0};
     sScanCfgParams org_fg, new_fg;   //foreground scan param
