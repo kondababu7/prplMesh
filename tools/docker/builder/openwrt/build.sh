@@ -72,7 +72,7 @@ main() {
         exit 1
     fi
 
-    if ! OPTS=$(getopt -o 'hb:d:io:r:t:v' --long help,build-options:,device:,image,openwrt-version:,openwrt-repository:,tag:,verbose -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hb:d:io:r:t:v' --long help,build-options:,target-device:,image,openwrt-version:,openwrt-repository:,tag:,verbose -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
         usage
         exit 1
