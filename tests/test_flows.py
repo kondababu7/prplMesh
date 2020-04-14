@@ -58,12 +58,11 @@ class TestFlows:
         if not tests:
             tests = self.tests
         for test in tests:
-            test_full = 'test_' + test
             self.start_test(test)
-            env.wired_sniffer.start(test_full)
+            env.wired_sniffer.start(test)
             self.check_error = 0
             try:
-                getattr(self, test_full)()
+                getattr(self, 'test_' + test)()
             finally:
                 env.wired_sniffer.stop()
             if self.check_error != 0:
