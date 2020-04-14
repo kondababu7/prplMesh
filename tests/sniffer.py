@@ -59,6 +59,20 @@ class Sniffer:
         except BaseException as ex:
             return None
 
+    def _simplify_packets(self, packets):
+        def _simplify(x):
+            x['src_mac'] = x['_source']['layers']['eth']['eth.src']
+            x['dst_mac'] = x['_source']['layers']['eth']['eth.dst']
+            x['time_epoch'] = float(x['_source']['layers']['frame']['frame.time_epoch'])
+            x['time'] = x['_source']['layers']['frame']['frame.time']
+            x['ieee1905_layer'] = x['_source']['layers']['ieee1905']
+            x['msg_type'] = int(x['ieee1905_layer']['ieee1905.message_type'])
+            x['mid'] = int(x['ieee1905_layer']['ieee1905.message_id'], 16)
+            x['tlvs'] = {entry[0]: entry[1] for entry in filter(
+                lambda a: a[0].startswith('ieee1905.') == False, x['ieee1905_layer'].items())}
+            return x
+        return list(map(_simplify, packets))
+
     def stop(self):
         '''Stop tcpdump if it is running.'''
         if self.tcpdump_proc:
