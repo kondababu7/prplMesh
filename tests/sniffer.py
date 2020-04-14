@@ -9,6 +9,7 @@ import os
 import subprocess
 import json
 from opts import debug, err, opts, status
+from time import time
 
 
 class Sniffer:
@@ -72,6 +73,23 @@ class Sniffer:
                 lambda a: a[0].startswith('ieee1905.') == False, x['ieee1905_layer'].items())}
             return x
         return list(map(_simplify, packets))
+
+    def get_packets_for_cmdu_type(self, test_name, msg_type: int):
+        def filter_func(x): return x['msg_type'] == msg_type
+        try:
+            return list(filter(filter_func, self.get_packet_capture(test_name)))
+        except:
+            err("No packets captured for specified cmdu type: {}".format(msg_type))
+            return None
+        return list(filter(filter_func, self.get_packet_capture(test_name)))
+
+    def filter_packets_by_time(self, packets, start_time=None, end_time=time()):
+        def _get_time_epoch_for_packet(packet):
+            t = packet['time_epoch']
+            if start_time:
+                return t >= start_time and t <= end_time
+            return t <= end_time
+        return list(filter(_get_time_epoch_for_packet, packets))
 
     def stop(self):
         '''Stop tcpdump if it is running.'''
