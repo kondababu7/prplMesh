@@ -26,7 +26,7 @@ class Sniffer:
         os.makedirs(os.path.join(opts.tcpdump_dir, 'logs'), exist_ok=True)
         outputfile = os.path.join(opts.tcpdump_dir, outputfile_basename) + ".pcap"
         self.outputfiles[test_name] = outputfile
-        command = ["tcpdump", "-i", self.interface, '-w', outputfile]
+        command = ["tcpdump", "-i", self.interface,'-U', '-w', outputfile]
         self.tcpdump_proc = subprocess.Popen(command, stderr=subprocess.PIPE)
         # tcpdump takes a while to start up. Wait for the appropriate output before continuing.
         # poll() so we exit the loop if tcpdump terminates for any reason.
