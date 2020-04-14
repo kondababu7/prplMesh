@@ -56,6 +56,13 @@ flake8-diff:
     - apk add --update --no-cache git
     - git diff -U0 origin/master | flake8 --verbose --diff
 
+shellcheck:
+  stage: build
+  image: pipelinecomponents/shellcheck:0.5.4
+  script:
+    - apk add --update --no-cache git
+    - git ls-files --ignore --exclude '*.sh' | xargs shellcheck -x -P SCRIPTDIR
+
 clang-format:
   extends: .in-prplmesh-builder
   stage: build
