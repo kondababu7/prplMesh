@@ -2147,7 +2147,14 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
 
         send_cmdu_to_controller(cmdu_tx);
 
-        break;
+        beerocks_message::sClientMonitoringParams monitoring_params;
+        monitoring_params.mac = notification_in->params().mac;
+        monitoring_params.bridge_4addr_mac =
+            network_utils::mac_from_string(backhaul_params.bridge_mac);
+        monitoring_params.vap_id = notification_in->params().vap_id;
+
+        LOG(DEBUG) << "Call start_monitoring from ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION";
+        return start_monitoring(monitoring_params);
     }
     case beerocks_message::ACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION: {
         auto notification_in = beerocks_header->addClass<
