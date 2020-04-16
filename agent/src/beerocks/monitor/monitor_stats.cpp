@@ -150,6 +150,8 @@ void monitor_stats::process()
         ap_stats_msg.client_tx_load_percent = radio_stats.client_tx_load_tot_curr;
         ap_stats_msg.client_rx_load_percent = radio_stats.client_rx_load_tot_curr;
 
+        std::vector<beerocks_message::sBssidInfo> bss_infos;
+
         for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
             auto sta_mac  = it->first;
             auto sta_node = it->second;
@@ -179,10 +181,49 @@ void monitor_stats::process()
             sta_stats_msg.rx_load_percent   = sta_stats.rx_load_percent_curr;
             sta_stats_msg.stats_delta_ms    = sta_stats.delta_ms;
             sta_stats_msg.rx_rssi           = sta_stats.rx_rssi_curr;
+
+            beerocks_message::sBssidInfo bss_info;
+            bss_info.bssid                      = network_utils::mac_from_string(sta_mac);
+            bss_info.earliest_measurement_delta = sta_stats.delta_ms;
+            // TODO: MAC data rate and Phy rate are not necessarily the same
+            bss_info.downlink_estimated_mac_data_rate_mbps = sta_stats.rx_phy_rate_100kb_avg / 10;
+            bss_info.uplink_estimated_mac_data_rate_mbps   = sta_stats.tx_phy_rate_100kb_avg / 10;
+            bss_info.sta_measured_uplink_rssi_dbm_enc      = sta_stats.rx_rssi_curr;
+
+            bss_infos.push_back(bss_info);
         }
 
         beerocks_header->actionhdr()->id() = requests_list.front();
         requests_list.pop_front();
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+
+        auto sta_metrics = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE>(cmdu_tx);
+        if (sta_metrics == nullptr) {
+            LOG(ERROR) << "Failed building "
+                          "cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE message!";
+            return;
+        }
+
+        if (!sta_metrics->alloc_bssid_info_list(bss_infos.size())) {
+            LOG(ERROR) << "Failed allocate_bssid_info_list";
+        }
+
+        // TODO: set sta_metrics->sta_mac
+
+        for (size_t i = 0; i < bss_infos.size(); ++i) {
+            auto &bss_info  = bss_infos[i];
+            auto &bss_reply = std::get<1>(sta_metrics->bssid_info_list(i));
+
+            bss_reply.bssid                      = bss_info.bssid;
+            bss_reply.earliest_measurement_delta = bss_info.earliest_measurement_delta;
+            bss_reply.downlink_estimated_mac_data_rate_mbps =
+                bss_info.downlink_estimated_mac_data_rate_mbps;
+            bss_reply.uplink_estimated_mac_data_rate_mbps =
+                bss_info.uplink_estimated_mac_data_rate_mbps;
+            bss_reply.sta_measured_uplink_rssi_dbm_enc = bss_info.sta_measured_uplink_rssi_dbm_enc;
+        }
+
         message_com::send_cmdu(slave_socket, cmdu_tx);
     }
 
