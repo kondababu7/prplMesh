@@ -78,4 +78,34 @@ bool CmduMessageTx::finalize()
     if (!addClass<tlvEndOfMessage>())
         return false;
     return msg.finalize();
-};
+}
+
+/**
+ * @brief Return how much element of given size can be allocated without create a MTU restriction
+ * overflow.
+ * 
+ * @param[in] size size of one element in bytes.
+ * @return size_t number of elements of 'size' that can be inserted.
+ */
+size_t CmduMessageTx::mtu_size_restriction_overflow_check(size_t size)
+{
+    size_t current_msg_length = 0;
+    auto ptr                  = msg.prevClass();
+    auto valid_ptr            = ptr;
+    while (ptr) {
+        valid_ptr       = ptr;
+        auto class_list = ptr->getInnerClassList();
+        if (!class_list) {
+            break;
+        }
+        ptr = class_list->prevClass();
+    }
+    // auto ptr = msg.prevClass()->getInnerClassList()->prevClass();
+    if (!valid_ptr) {
+        return 0;
+    }
+
+    current_msg_length = valid_ptr->getBuffPtr() - getMessageBuff();
+    auto size_left     = MTU_SIZE - current_msg_length - tlvEndOfMessage::get_initial_size();
+    return size_left / size;
+}
