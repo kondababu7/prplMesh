@@ -268,6 +268,8 @@ bool socket_thread::work()
         return false;
     }
 
+    m_select_wake_up_time = std::chrono::steady_clock::now();
+
     after_select(bool(sel_ret == 0));
 
     if (sel_ret == 0) {

@@ -16,6 +16,8 @@
 #include <tlvf/CmduMessageRx.h>
 #include <tlvf/CmduMessageTx.h>
 
+#include <chrono>
+
 #define DEFAULT_SELECT_TIMEOUT_MS 500
 
 namespace beerocks {
@@ -55,6 +57,17 @@ protected:
     inline void clear_ready(Socket *s) { select.clearReady(s); }
     virtual bool read_ready(Socket *s) { return select.readReady(s); }
 
+    // This function needs to be used on code parts in before/after select functions, where we
+    // suspect that its operation might take a long time (> select_timeout) and will not finish the
+    // thread operation before the select timeout should have been expired if the thread had ideal
+    // operation time of zero.
+    std::chrono::steady_clock::time_point awake_timeout()
+    {
+        // Set the awake timeout to 50% of the select timeout to create a buffer of 50%
+        // to let the thread finish its work until getting to Select again.
+        return m_select_wake_up_time + std::chrono::milliseconds(int(0.50 * m_select_timeout_msec));
+    }
+
     ieee1905_1::CmduMessageTx cmdu_tx;
     ieee1905_1::CmduMessageTx cert_cmdu_tx;
     const std::string unix_socket_path;
@@ -81,7 +94,8 @@ private:
     int server_max_connections;
     SocketSelect select;
 
-    int m_select_timeout_msec = 0;
+    int m_select_timeout_msec                                   = 0;
+    std::chrono::steady_clock::time_point m_select_wake_up_time = std::chrono::steady_clock::now();
 };
 
 } // namespace beerocks
