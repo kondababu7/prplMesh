@@ -30,7 +30,7 @@ public:
     virtual ~transport_socket_thread();
 
     virtual bool init() override;
-    virtual void set_select_timeout(unsigned msec) override;
+    virtual void set_select_timeout(unsigned msec, bool sticky = true) override;
     virtual bool work() override;
 
     bool send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu, const std::string &dst_mac,

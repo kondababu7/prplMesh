@@ -90,8 +90,15 @@ bool socket_thread::init()
     return true;
 }
 
-void socket_thread::set_select_timeout(unsigned msec)
+void socket_thread::set_select_timeout(unsigned msec, bool sticky)
 {
+    // Reset value
+    if (msec == 0) {
+        msec = m_select_timeout_msec;
+    } else if (sticky) {
+        m_select_timeout_msec = msec;
+    }
+
     struct timeval tv;
     tv.tv_sec  = (msec / 1000);
     tv.tv_usec = (1000 * (msec % 1000));

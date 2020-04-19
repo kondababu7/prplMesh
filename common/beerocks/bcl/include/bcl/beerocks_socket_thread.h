@@ -29,7 +29,7 @@ public:
     socket_thread(const std::string &unix_socket_path_ = std::string());
     virtual ~socket_thread();
     void set_server_max_connections(int connections);
-    virtual void set_select_timeout(unsigned msec);
+    virtual void set_select_timeout(unsigned msec, bool sticky = true);
 
     virtual bool init() override;
     virtual bool work() override;
@@ -80,6 +80,8 @@ private:
 
     int server_max_connections;
     SocketSelect select;
+
+    int m_select_timeout_msec = 0;
 };
 
 } // namespace beerocks

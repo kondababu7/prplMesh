@@ -36,7 +36,10 @@ bool transport_socket_thread::init()
     return true;
 }
 
-void transport_socket_thread::set_select_timeout(unsigned msec) { poll_timeout_ms = msec; }
+void transport_socket_thread::set_select_timeout(unsigned msec, bool sticky)
+{
+    poll_timeout_ms = msec;
+}
 
 bool transport_socket_thread::send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu_tx,
                                                const std::string &dst_mac,
