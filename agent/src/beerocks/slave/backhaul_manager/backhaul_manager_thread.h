@@ -94,14 +94,17 @@ private:
     bool handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                         const std::string &src_mac);
     /**
-     * @brief Get bssid to which sta_mac is associated
+     * @brief Get bssid to which sta_mac is associated and the socket of the corresponding agent
      *
      * @param[in] sta_mac mac address of sta
      * @param[in,out] bssid to which the sta is connected
+     * @param[in,out] socket socket of the agent that manages this sta
      * @return true if the sta is connected to one of the bss's operated by the agent
      * @return false otherwise
      */
-    bool get_sta_bssid(const sMacAddr &sta_mac, sMacAddr &bssid);
+    bool get_sta_bssid_and_socket(const sMacAddr &sta_mac, sMacAddr &bssid,
+                                  Socket **socket = nullptr);
+
     bool handle_associated_sta_link_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                   const std::string &src_mac);
     //bool sta_handle_event(const std::string &iface,const std::string& event_name, void* event_obj);
