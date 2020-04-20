@@ -2128,7 +2128,8 @@ bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::Cmdu
     // Check if it is an error scenario - if the STA specified in the STA link Query message is not associated
     // with any of the BSS operated by the Multi-AP Agent
     sMacAddr bssid;
-    if (!get_sta_bssid_and_socket(mac->sta_mac(), bssid)) {
+    Socket *socket;
+    if (!get_sta_bssid_and_socket(mac->sta_mac(), bssid, &socket)) {
         LOG(ERROR) << "client with mac address " << mac->sta_mac() << " not found";
         //Add an Error Code TLV
         auto error_code_tlv = cmdu_tx.addClass<wfa_map::tlvErrorCode>();
@@ -2144,8 +2145,18 @@ bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::Cmdu
         return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
     } else {
         LOG(DEBUG) << "client with mac address " << mac->sta_mac() << " connected to " << bssid;
-        //TODO
-        return false;
+
+        auto request_out = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST>(cmdu_tx);
+
+        if (!request_out) {
+            LOG(ERROR) << "Failed to build ACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST";
+            return false;
+        }
+
+        request_out->sync() = true;
+
+        return message_com::send_cmdu(socket, cmdu_tx);
     }
 }
 

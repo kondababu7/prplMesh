@@ -499,6 +499,19 @@ class TestFlows:
                                      tlv(0x95, 0x0006, '{sta_mac}'.format(sta_mac=sta_mac)))
         self.check_log(env.agents[0],
                        "client with mac address {sta_mac} not found".format(sta_mac=sta_mac))
+        time.sleep(1)
+
+        sta = env.Station.create()
+        debug('sta: {}'.format(sta.mac))
+
+        env.agents[0].radios[0].vaps[0].associate(sta)
+
+        time.sleep(1)
+
+        env.controller.dev_send_1905(env.agents[0].mac, 0x800D,
+                                     tlv(0x95, 0x0006, '{sta_mac}'.format(sta_mac=sta.mac)))
+        time.sleep(1)
+        self.check_log(env.agents[0].radios[0], "Send AssociatedStaLinkMetrics to controller")
 
     def test_client_steering_mandate(self):
         debug("Send topology request to agent 1")
