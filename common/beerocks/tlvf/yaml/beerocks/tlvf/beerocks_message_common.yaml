@@ -280,9 +280,6 @@ sNodeHostap:
   driver_version:
     _type: char  
     _length: [ "beerocks::message::WIFI_DRIVER_VER_LENGTH" ]
-  supported_channels:
-    _type: beerocks::message::sWifiChannel 
-    _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]          
   preferred_channels:
     _type: beerocks::message::sWifiChannel 
     _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]          
