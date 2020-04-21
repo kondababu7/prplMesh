@@ -33,7 +33,7 @@ run_cppcheck() {
              -j"$(nproc)" \
              -q \
              $INCLUDES \
-             "$@" 2>&1 | tee "$OUTPUT_FILE"
+             "$@" 2>&1 | sort | tee "$OUTPUT_FILE"
 }
 
 colorize_severity() {
