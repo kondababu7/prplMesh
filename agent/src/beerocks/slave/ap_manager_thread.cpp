@@ -786,8 +786,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        auto tuple_supported_channels = response->supported_channels_list(0);
-        copy_radio_supported_channels(ap_wlan_hal, &std::get<1>(tuple_supported_channels));
+        auto tuple_preferred_channels = response->preferred_channels_list(0);
+        copy_radio_supported_channels(ap_wlan_hal, &std::get<1>(tuple_preferred_channels));
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
         break;
@@ -1111,8 +1111,8 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
-            auto tuple_supported_channels = notification->supported_channels_list(0);
-            copy_radio_supported_channels(ap_wlan_hal, &std::get<1>(tuple_supported_channels));
+            auto tuple_preferred_channels = notification->preferred_channels_list(0);
+            copy_radio_supported_channels(ap_wlan_hal, &std::get<1>(tuple_preferred_channels));
             fill_cs_params(notification->cs_params());
             acs_completed_vap_update = true;
         } else {
