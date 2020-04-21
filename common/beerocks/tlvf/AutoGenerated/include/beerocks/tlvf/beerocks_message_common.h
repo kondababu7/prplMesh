@@ -379,6 +379,7 @@ typedef struct sNodeHostap {
     uint8_t vht_mcs_set[beerocks::message::VHT_MCS_SET_SIZE];
     char driver_version[beerocks::message::WIFI_DRIVER_VER_LENGTH];
     beerocks::message::sWifiChannel supported_channels[beerocks::message::RADIO_CHANNELS_LENGTH];
+    beerocks::message::sWifiChannel preferred_channels[beerocks::message::RADIO_CHANNELS_LENGTH];
     void struct_swap(){
         iface_mac.struct_swap();
         tlvf_swap(8*sizeof(beerocks::eFreqType), reinterpret_cast<uint8_t*>(&frequency_band));
@@ -388,11 +389,17 @@ typedef struct sNodeHostap {
         for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++){
             (supported_channels[i]).struct_swap();
         }
+        for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++){
+            (preferred_channels[i]).struct_swap();
+        }
     }
     void struct_init(){
         iface_mac.struct_init();
             for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++) {
                 (supported_channels[i]).struct_init();
+            }
+            for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++) {
+                (preferred_channels[i]).struct_init();
             }
     }
 } __attribute__((packed)) sNodeHostap;
