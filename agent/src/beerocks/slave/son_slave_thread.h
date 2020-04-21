@@ -249,6 +249,8 @@ private:
     bool handle_client_association_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_client_steering_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_ack_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+
+    bool start_monitoring(const beerocks_message::sClientMonitoringParams &params);
 };
 
 } // namespace son

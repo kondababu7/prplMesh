@@ -394,6 +394,26 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     return true;
 }
 
+bool slave_thread::start_monitoring(const beerocks_message::sClientMonitoringParams &params)
+{
+    std::string client_mac              = network_utils::mac_to_string(params.mac);
+    std::string client_bridge_4addr_mac = network_utils::mac_to_string(params.bridge_4addr_mac);
+
+    LOG(DEBUG) << "START_MONITORING_REQUEST: mac=" << client_mac
+               << " bridge_4addr_mac=" << client_bridge_4addr_mac
+               << " vap_id=" << std::to_string(params.vap_id);
+
+    //notify monitor
+    auto request_out = message_com::create_vs_message<
+        beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST>(cmdu_tx);
+    if (!request_out) {
+        LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST message!";
+        return false;
+    }
+    request_out->params() = params;
+    return message_com::send_cmdu(monitor_socket, cmdu_tx);
+}
+
 bool slave_thread::handle_cmdu_control_message(Socket *sd,
                                                std::shared_ptr<beerocks_header> beerocks_header)
 {
@@ -515,13 +535,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             return false;
         }
 
-        std::string client_mac = network_utils::mac_to_string(request_in->params().mac);
-        std::string client_bridge_4addr_mac =
-            network_utils::mac_to_string(request_in->params().bridge_4addr_mac);
-
-        LOG(DEBUG) << "START_MONITORING_REQUEST: mac=" << client_mac
-                   << " bridge_4addr_mac=" << client_bridge_4addr_mac;
-
         if (request_in->params().is_ire) {
             auto request_out = message_com::create_vs_message<
                 beerocks_message::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION>(cmdu_tx);
@@ -534,17 +547,8 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             message_com::send_cmdu(ap_manager_socket, cmdu_tx);
         }
 
-        //notify monitor
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST>(
-            cmdu_tx, beerocks_header->id());
-        if (request_out == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST message!";
-            return false;
-        }
-        request_out->params() = request_in->params();
-        message_com::send_cmdu(monitor_socket, cmdu_tx);
-        break;
+        LOG(DEBUG) << "Call start_monitoring from ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST";
+        return start_monitoring(request_in->params());
     }
 
     case beerocks_message::ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST: {
