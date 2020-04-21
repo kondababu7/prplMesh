@@ -1787,10 +1787,10 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
         notification_out->cs_params()     = notification_in->cs_params();
-        auto tuple_in_supported_channels  = notification_in->supported_channels_list(0);
-        auto tuple_out_supported_channels = notification_out->supported_channels(0);
-        std::copy_n(&std::get<1>(tuple_in_supported_channels), message::RADIO_CHANNELS_LENGTH,
-                    &std::get<1>(tuple_out_supported_channels));
+        auto tuple_in_preferred_channels  = notification_in->preferred_channels_list(0);
+        auto tuple_out_preferred_channels = notification_out->preferred_channels_list(0);
+        std::copy_n(&std::get<1>(tuple_in_preferred_channels), message::RADIO_CHANNELS_LENGTH,
+                    &std::get<1>(tuple_out_preferred_channels));
         send_cmdu_to_controller(cmdu_tx);
         send_operating_channel_report();
         break;
@@ -2238,9 +2238,9 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
 
-        auto tuple_supported_channels = response->supported_channels_list(0);
-        std::copy_n(&std::get<1>(tuple_supported_channels), message::RADIO_CHANNELS_LENGTH,
-                    hostap_params.supported_channels);
+        auto tuple_preferred_channels = response->preferred_channels_list(0);
+        std::copy_n(&std::get<1>(tuple_preferred_channels), message::RADIO_CHANNELS_LENGTH,
+                    hostap_params.preferred_channels);
 
         // build channel preference report
         auto cmdu_tx_header = cmdu_tx.create(
