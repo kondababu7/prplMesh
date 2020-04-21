@@ -29,6 +29,7 @@ run_cppcheck() {
              --force \
              --error-exitcode=1 \
              --enable=warning,style,information \
+             -rp="$rootdir" \
              -j"$(nproc)" \
              -q \
              $INCLUDES \
