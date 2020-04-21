@@ -1556,6 +1556,14 @@ bool ap_wlan_hal_dwpal::read_supported_channels()
         }
     }
 
+    m_radio_info.supported_channels.insert(m_radio_info.supported_channels.begin(),
+                                           preferred_channels.begin(), preferred_channels.end());
+    return true;
+}
+
+bool ap_wlan_hal_dwpal::update_preference_channels_from_supported_channels()
+{
+    m_radio_info.preferred_channels = m_radio_info.supported_channels;
     return true;
 }
 
