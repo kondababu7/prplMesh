@@ -37,7 +37,7 @@ cppcheck-diff:
     expire_in: 4 weeks
     when: always
   tags:
-    - docker
+- docker
 
 
 flake8:
@@ -58,9 +58,10 @@ flake8-diff:
 
 shellcheck:
   stage: build
-  image: pipelinecomponents/shellcheck:0.5.4
-  script:
+  image: koalaman/shellcheck-alpine:v0.7.1
+  before_script:
     - apk add --update --no-cache git
+  script:
     - git ls-files --ignore --exclude '*.sh' | xargs shellcheck -x -P SCRIPTDIR
 
 clang-format:
