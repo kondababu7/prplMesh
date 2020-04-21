@@ -18,7 +18,7 @@ do
     if ! grep -q -F "$i" "$rootdir"/ci/cppcheck/cppcheck_existing_issues.txt ; then
         status=1
         err "New issue:"
-        grep -F -A2 "$i" "$rootdir/cppcheck_results.txt"
+        grep -F "$i" "$rootdir/cppcheck_results.txt"
     fi
 done
 
