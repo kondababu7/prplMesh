@@ -83,7 +83,6 @@ void association_handling_task::work()
          */
 
         std::string new_hostap_mac;
-        std::string ipv4;
 
         new_hostap_mac = database.get_node_parent(sta_mac);
         if (new_hostap_mac != original_parent_mac ||
@@ -106,7 +105,6 @@ void association_handling_task::work()
         }
 
         request->params().mac    = network_utils::mac_from_string(sta_mac);
-        request->params().ipv4   = network_utils::ipv4_from_string(ipv4);
         request->params().vap_id = database.get_node_vap_id(sta_mac);
         request->params().is_ire = false;
 

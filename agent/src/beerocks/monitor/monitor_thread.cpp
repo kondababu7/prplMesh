@@ -725,13 +725,12 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST failed";
             return false;
         }
-        std::string sta_mac  = network_utils::mac_to_string(request->params().mac);
-        std::string sta_ipv4 = network_utils::ipv4_to_string(request->params().ipv4);
+        std::string sta_mac = network_utils::mac_to_string(request->params().mac);
         std::string set_bridge_4addr_mac =
             network_utils::mac_to_string(request->params().bridge_4addr_mac);
         int vap_id = int(request->params().vap_id);
         LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
-                  << " ip=" << sta_ipv4 << " vap_id=" << vap_id;
+                  << " vap_id=" << vap_id;
 
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>(
@@ -757,7 +756,6 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
 
         sta_node = mon_db.sta_add(sta_mac, vap_id);
-        sta_node->set_ipv4(sta_ipv4);
         sta_node->set_bridge_4addr_mac(set_bridge_4addr_mac);
 
         response->success() = true;
