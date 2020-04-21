@@ -2101,9 +2101,6 @@ bool master_thread::handle_intel_slave_join(
     database.set_node_ipv4(radio_mac, bridge_ipv4);
     database.set_node_manufacturer(radio_mac, "Intel");
 
-    database.set_hostap_supported_channels(radio_mac, notification->hostap().supported_channels,
-                                           message::RADIO_CHANNELS_LENGTH);
-
     if (database.get_node_5ghz_support(radio_mac)) {
         if (notification->low_pass_filter_on()) {
             database.set_hostap_band_capability(radio_mac, beerocks::LOW_SUBBAND_ONLY);
@@ -2183,9 +2180,9 @@ bool master_thread::handle_intel_slave_join(
                    << " cs_new_event = " << intptr_t(cs_new_event);
         cs_new_event->hostap_mac = network_utils::mac_from_string(radio_mac);
         cs_new_event->cs_params  = notification->cs_params();
-        for (auto supported_channel : notification->hostap().supported_channels) {
-            if (supported_channel.channel > 0) {
-                LOG(DEBUG) << "supported_channel = " << int(supported_channel.channel);
+        for (auto preferred_channel : notification->hostap().preferred_channels) {
+            if (preferred_channel.channel > 0) {
+                LOG(DEBUG) << "preferred_channel = " << int(preferred_channel.channel);
             }
         }
 
